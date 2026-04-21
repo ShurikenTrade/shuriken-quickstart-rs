@@ -66,7 +66,8 @@ async fn main() {
     println!("\nUsing wallet: {label} ({})", sol_wallet.address);
 
     // ── Confirm before executing ──────────────────────────────────────
-    if !confirm("\n⚠️  This will execute a REAL trade: 0.001 SOL → JUP. Type 'yes' to continue:  ") {
+    if !confirm("\n⚠️  This will execute a REAL trade: 0.001 SOL → JUP. Type 'yes' to continue:  ")
+    {
         println!("Aborted.");
         return;
     }
@@ -103,10 +104,7 @@ async fn main() {
                 if task.status != "pending" {
                     log_section("Final Result");
                     println!("  Status  : {}", task.status);
-                    println!(
-                        "  Tx Hash : {}",
-                        task.tx_hash.as_deref().unwrap_or("N/A")
-                    );
+                    println!("  Tx Hash : {}", task.tx_hash.as_deref().unwrap_or("N/A"));
                     if let Some(err) = &task.error_message {
                         println!("  Error   : {err}");
                     }

@@ -75,11 +75,7 @@ async fn main() {
         }
 
         println!("  Enabling multisend...");
-        let task_id = match client
-            .account()
-            .enable_multisend(&wallet.wallet_id)
-            .await
-        {
+        let task_id = match client.account().enable_multisend(&wallet.wallet_id).await {
             Ok(resp) => resp.task_id,
             Err(e) => {
                 eprintln!("  Failed to enable multisend: {e}");

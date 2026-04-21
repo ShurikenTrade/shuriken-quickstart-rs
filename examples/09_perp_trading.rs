@@ -159,10 +159,7 @@ async fn main() {
                 Err(e) => handle_error(e),
             };
             for r in &cancel_resp.results {
-                println!(
-                    "  status={} oid={:?} error={:?}",
-                    r.status, r.oid, r.error
-                );
+                println!("  status={} oid={:?} error={:?}", r.status, r.oid, r.error);
             }
         }
     }
