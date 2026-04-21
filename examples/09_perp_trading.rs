@@ -3,16 +3,14 @@
 /// Place a limit order on Hyperliquid with take-profit and stop-loss,
 /// inspect it, then cancel it.
 ///
-/// WARNING: When DRY_RUN is set to false this places a REAL order
-/// (then immediately cancels it). The limit price is set far from
-/// market so it should not fill.
+/// WARNING: This places a REAL order (then immediately cancels it).
+/// The limit price is set far from market so it should not fill.
+/// Asks for confirmation before placing.
 use shuriken_quickstart_rs::*;
 use shuriken_sdk::perps::{
     CancelOrderParams, GetPerpAccountParams, GetPerpFeesParams, GetPerpOrdersParams,
     GetPerpPositionsParams, PlaceOrderParams, TpSlParams,
 };
-
-const DRY_RUN: bool = true;
 
 #[tokio::main]
 async fn main() {
@@ -75,11 +73,12 @@ async fn main() {
     println!("  Take Profit: {tp_px}");
     println!("  Stop Loss  : {sl_px}");
 
-    if DRY_RUN {
-        println!();
-        println!("  [DRY RUN] Would place limit buy order");
-        println!("  Set DRY_RUN = false to execute for real");
-    } else {
+    if !confirm("\n⚠️  Place order and immediately cancel? Type 'yes' to continue:  ") {
+        println!("Aborted.");
+        return;
+    }
+
+    {
         let order_resp = match client
             .perps()
             .place_order(&PlaceOrderParams {
@@ -159,7 +158,12 @@ async fn main() {
                 Ok(r) => r,
                 Err(e) => handle_error(e),
             };
-            log_json("Cancel Result", &cancel_resp);
+            for r in &cancel_resp.results {
+                println!(
+                    "  status={} oid={:?} error={:?}",
+                    r.status, r.oid, r.error
+                );
+            }
         }
     }
 

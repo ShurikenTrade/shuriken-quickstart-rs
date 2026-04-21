@@ -48,7 +48,13 @@ async fn main() {
         Ok(usage) => {
             println!("  Key ID : {}", usage.key_id);
             println!("  Scopes : {}", usage.scopes.join(", "));
-            log_json("Constraints", &usage.constraints);
+            let c = &usage.constraints;
+            println!("  Buys enabled          : {}", c.buys_enabled);
+            println!("  Sells enabled         : {}", c.sells_enabled);
+            println!("  Max executions/hour   : {}", c.max_executions_per_hour);
+            println!("  Max executions/day    : {}", c.max_executions_per_day);
+            println!("  Max concurrent        : {}", c.max_concurrent_executions);
+            println!("  Max limit orders/day  : {}", c.max_limit_orders_per_day);
         }
         Err(e) => handle_error(e),
     }

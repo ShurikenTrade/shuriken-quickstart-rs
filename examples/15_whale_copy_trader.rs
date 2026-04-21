@@ -126,23 +126,26 @@ async fn main() {
                                     copy_count += 1;
                                     println!("    COPIED! Task: {}", result.task_id);
 
-                                    let mut status = result;
-                                    while status.status == "submitted" || status.status == "pending"
-                                    {
+                                    let task_id = result.task_id;
+                                    loop {
                                         tokio::time::sleep(Duration::from_secs(2)).await;
-                                        match client.swap().get_status(&status.task_id).await {
-                                            Ok(s) => status = s,
+                                        match client.tasks().get_status(&task_id).await {
+                                            Ok(task) => {
+                                                if task.status != "pending" {
+                                                    println!(
+                                                        "    Final: {} Tx: {}\n",
+                                                        task.status,
+                                                        task.tx_hash.as_deref().unwrap_or("N/A"),
+                                                    );
+                                                    break;
+                                                }
+                                            }
                                             Err(e) => {
                                                 println!("    Poll error: {e}");
                                                 break;
                                             }
                                         }
                                     }
-                                    println!(
-                                        "    Final: {} Tx: {}\n",
-                                        status.status,
-                                        status.tx_hash.as_deref().unwrap_or("N/A"),
-                                    );
                                 }
                                 Err(e) => println!("    Error executing swap: {e}\n"),
                             }

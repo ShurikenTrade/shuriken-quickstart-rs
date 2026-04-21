@@ -70,6 +70,45 @@ pub fn log_json(label: &str, data: &impl serde::Serialize) {
     println!("{}", serde_json::to_string_pretty(data).unwrap_or_default());
 }
 
+/// Prompt the user for a line of input. Returns the trimmed response.
+pub fn prompt(message: &str) -> String {
+    use std::io::Write;
+    print!("{message}");
+    std::io::stdout().flush().unwrap();
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input).unwrap();
+    input.trim().to_string()
+}
+
+/// Prompt the user for a non-empty line of input. Re-prompts until non-empty.
+pub fn prompt_non_empty(message: &str) -> String {
+    loop {
+        let input = prompt(message);
+        if !input.is_empty() {
+            return input;
+        }
+        println!("  Input must not be empty. Please try again.");
+    }
+}
+
+/// Prompt the user to confirm an action. Returns true if they type "yes".
+pub fn confirm(message: &str) -> bool {
+    prompt(message).eq_ignore_ascii_case("yes")
+}
+
+/// Prompt the user to choose from a numbered list. Returns 0-based index.
+pub fn choose(prompt_msg: &str, count: usize) -> usize {
+    loop {
+        let input = prompt(prompt_msg);
+        if let Ok(n) = input.parse::<usize>() {
+            if n >= 1 && n <= count {
+                return n - 1;
+            }
+        }
+        println!("  Please enter a number between 1 and {count}");
+    }
+}
+
 pub fn handle_error(err: ShurikenError) -> ! {
     match &err {
         ShurikenError::Auth(_) => {
