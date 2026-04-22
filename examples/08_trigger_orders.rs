@@ -9,6 +9,7 @@ use shuriken_quickstart_rs::*;
 use shuriken_sdk::portfolio::GetBalancesParams;
 use shuriken_sdk::tokens::SearchTokensParams;
 use shuriken_sdk::trigger::CreateTriggerOrderParams;
+use shuriken_sdk::ShurikenError;
 
 const SOL: &str = "So11111111111111111111111111111111111111112";
 
@@ -62,70 +63,6 @@ async fn main() {
 
     let label = wallet.label.as_deref().unwrap_or(&wallet.wallet_id);
     println!("\nUsing wallet: {label} ({})", wallet.address);
-
-    // ── Check multisend ──────────────────────────────────────────────
-    if wallet.is_multisend_enabled == Some(false) {
-        println!("\n  This wallet does not have multisend enabled.");
-        println!("  Trigger orders on Solana require this feature.");
-        println!("  Enabling it is an on-chain action and incurs a small SOL fee.");
-
-        if !confirm("\n  Enable multisend for this wallet? Type 'yes' to continue:  ") {
-            println!("Aborted.");
-            return;
-        }
-
-        println!("  Enabling multisend...");
-        let task_id = match client.account().enable_multisend(&wallet.wallet_id).await {
-            Ok(resp) => resp.task_id,
-            Err(e) => {
-                eprintln!("  Failed to enable multisend: {e}");
-                return;
-            }
-        };
-
-        // Poll until the on-chain task completes
-        loop {
-            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-            match client.tasks().get_status(&task_id).await {
-                Ok(s) => {
-                    println!("  Multisend status: {}", s.status);
-                    match s.status.as_str() {
-                        "pending" => continue,
-                        "success" => {
-                            println!("  Multisend enabled successfully.");
-                            break;
-                        }
-                        _ => {
-                            eprintln!(
-                                "  Multisend task failed: {}",
-                                s.error_message.as_deref().unwrap_or(&s.status)
-                            );
-                            return;
-                        }
-                    }
-                }
-                Err(e) => {
-                    println!("  Task poll ended: {e}");
-                    break;
-                }
-            }
-        }
-
-        // Offer to enable auto-multisend for all future wallets
-        println!("\n  You can also enable auto-multisend so new wallets get this automatically.");
-        if confirm("  Enable auto-multisend for future wallets? Type 'yes':  ") {
-            match client.account().get_settings().await {
-                Ok(mut settings) => {
-                    settings.trade_settings.auto_enable_multisend = true;
-                    match client.account().update_settings(&settings).await {
-                        Ok(_) => println!("  Auto-multisend enabled."),
-                        Err(e) => eprintln!("  Failed to update settings: {e}"),
-                    }
-                }
-                Err(e) => eprintln!("  Failed to fetch settings: {e}"),
-            }
-        }
-    }
 
     // ── Pick a token ──────────────────────────────────────────────────
     let query = prompt_non_empty("\nSearch for a token (name, symbol, or address):  ");
@@ -229,22 +166,74 @@ async fn main() {
 
     // ── Create the order ──────────────────────────────────────────────
     log_section("Creating Trigger Order");
-    let order = match client
-        .trigger()
-        .create(&CreateTriggerOrderParams {
-            chain: "solana".into(),
-            input_token: SOL.into(),
-            output_token: token.address.clone(),
-            amount: amount_lamports,
-            wallet_id: wallet.wallet_id.clone(),
-            trigger_metric: "price_usd".into(),
-            trigger_direction: direction,
-            trigger_value: Some(trigger_price),
-            ..Default::default()
-        })
-        .await
-    {
+    let order_params = CreateTriggerOrderParams {
+        chain: "solana".into(),
+        input_token: SOL.into(),
+        output_token: token.address.clone(),
+        amount: amount_lamports,
+        wallet_id: wallet.wallet_id.clone(),
+        trigger_metric: "price_usd".into(),
+        trigger_direction: direction,
+        trigger_value: Some(trigger_price),
+        ..Default::default()
+    };
+
+    let order = match client.trigger().create(&order_params).await {
         Ok(o) => o,
+        Err(ShurikenError::Api { ref response, .. })
+            if response.error.code == "NONCE_NOT_INITIALIZED" =>
+        {
+            println!("\n  This wallet does not have durable nonce initialized.");
+            println!("  Trigger orders on Solana require this feature.");
+            println!("  Enabling it is an on-chain action and incurs a small SOL fee.");
+
+            if !confirm("\n  Enable multisend for this wallet? Type 'yes' to continue:  ") {
+                println!("Aborted.");
+                return;
+            }
+
+            println!("  Enabling multisend...");
+            let task_id = match client.account().enable_multisend(&wallet.wallet_id).await {
+                Ok(resp) => resp.task_id,
+                Err(e) => {
+                    eprintln!("  Failed to enable multisend: {e}");
+                    return;
+                }
+            };
+
+            loop {
+                tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+                match client.tasks().get_status(&task_id).await {
+                    Ok(s) => {
+                        println!("  Multisend status: {}", s.status);
+                        match s.status.as_str() {
+                            "pending" => continue,
+                            "success" => {
+                                println!("  Multisend enabled successfully.");
+                                break;
+                            }
+                            _ => {
+                                eprintln!(
+                                    "  Multisend task failed: {}",
+                                    s.error_message.as_deref().unwrap_or(&s.status)
+                                );
+                                return;
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("  Task poll failed: {e}");
+                        return;
+                    }
+                }
+            }
+
+            // Retry creating the order
+            match client.trigger().create(&order_params).await {
+                Ok(o) => o,
+                Err(e) => handle_error(e),
+            }
+        }
         Err(e) => handle_error(e),
     };
 

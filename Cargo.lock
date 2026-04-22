@@ -1119,11 +1119,12 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "shuriken-api-types"
-version = "0.3.1"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bc7fdc6b5e45f79ba8f8d4575eefcc22d6251654465a0f676ac373b4851fa8e"
+checksum = "64b0d7397474145e62df1762f5ab942634dc222954d6c9b852fa50ffc93ca16f"
 dependencies = [
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -1140,9 +1141,7 @@ dependencies = [
 
 [[package]]
 name = "shuriken-sdk"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0299b92d7b8ad0739182aef3ae4fe381165779e07c881002b3dbe018b8fce714"
+version = "0.4.2"
 dependencies = [
  "futures-core",
  "futures-util",

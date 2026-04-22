@@ -6,7 +6,7 @@ description = "Quickstart examples for the Shuriken Rust SDK"
 license = "MIT"
 
 [dependencies]
-shuriken-sdk = { version = "0.4.0", features = ["ws"] }
+shuriken-sdk = { version = "0.4.0", features = ["ws"], path = "../shuriken-sdk-rs" }
 tokio = { version = "1", features = ["full"] }
 dotenvy = "0.15"
 serde = "1"
