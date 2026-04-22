@@ -1142,6 +1142,8 @@ dependencies = [
 [[package]]
 name = "shuriken-sdk"
 version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "374285b5d2aeb0cb0a7656f4b11b45b3e08cfd5b248c97567cfbb9fb94b92dc5"
 dependencies = [
  "futures-core",
  "futures-util",
