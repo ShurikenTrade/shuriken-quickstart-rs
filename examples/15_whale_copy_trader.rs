@@ -73,7 +73,7 @@ async fn main() {
 
     loop {
         tokio::select! {
-            Some(event) = sub.next() => {
+            Some(Ok(event)) = sub.next() => {
                 let is_new_position = event.pre_balance == 0 && event.post_balance > 0;
                 let is_sell = event.pre_balance > 0 && event.post_balance == 0;
 

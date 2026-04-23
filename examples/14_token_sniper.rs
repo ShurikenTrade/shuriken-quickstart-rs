@@ -65,7 +65,7 @@ async fn main() {
 
     loop {
         tokio::select! {
-            Some(event) = sub.next() => {
+            Some(Ok(event)) = sub.next() => {
                 seen += 1;
                 let token_address = &event.token_address;
                 println!("  [{seen}] New token: {token_address} ({})", event.curve_dex_type);

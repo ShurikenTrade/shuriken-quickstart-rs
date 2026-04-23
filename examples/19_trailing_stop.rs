@@ -82,7 +82,7 @@ async fn main() {
 
     loop {
         tokio::select! {
-            Some(event) = sub.next() => {
+            Some(Ok(event)) = sub.next() => {
                 event_count += 1;
                 let price: f64 = event.price_usd.parse().unwrap_or(0.0);
                 if price <= 0.0 {

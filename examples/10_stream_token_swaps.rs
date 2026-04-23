@@ -41,7 +41,7 @@ async fn main() {
 
     loop {
         tokio::select! {
-            Some(event) = sub.next() => {
+            Some(Ok(event)) = sub.next() => {
                 count += 1;
                 let side = if event.is_buy { "BUY " } else { "SELL" };
                 let sol: f64 = event.size_sol.parse().unwrap_or(0.0);

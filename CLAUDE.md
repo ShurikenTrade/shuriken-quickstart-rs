@@ -5,7 +5,7 @@ Quickstart examples repo for the `shuriken-sdk` Rust SDK.
 ## Structure
 
 - `src/lib.rs` — shared helpers (client constructors, formatters, error handling)
-- `examples/` — 20 numbered example scripts
+- `examples/` — 25 numbered example scripts
 
 ### Example categories
 
@@ -13,6 +13,7 @@ Quickstart examples repo for the `shuriken-sdk` Rust SDK.
 - **07–09** Trading examples that execute writes (swaps, triggers, perp orders)
 - **10–13** WebSocket streaming examples
 - **14–20** Advanced composite examples combining multiple SDK features
+- **21–25** Alpha stream examples (personal alpha, signal feeds)
 
 ## Quick start
 

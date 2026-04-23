@@ -33,7 +33,7 @@ async fn main() {
 
     loop {
         tokio::select! {
-            Some(event) = sub.next() => {
+            Some(Ok(event)) = sub.next() => {
                 count += 1;
                 println!("  #{count} Graduation");
                 println!("    Token     : {}", event.token_address);

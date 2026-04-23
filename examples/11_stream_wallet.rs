@@ -62,7 +62,7 @@ async fn main() {
 
     loop {
         tokio::select! {
-            Some(event) = sub.next() => {
+            Some(Ok(event)) = sub.next() => {
                 count += 1;
                 let pre = event.pre_balance as f64 / 1e9;
                 let post = event.post_balance as f64 / 1e9;

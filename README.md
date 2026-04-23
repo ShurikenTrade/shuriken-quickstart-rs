@@ -64,6 +64,16 @@ Replace `01_account_info` with the name of any example file (without the `.rs` e
 | 19 | `trailing_stop` | Stream price → dynamically update trigger orders as a trailing stop |
 | 20 | `watchlist_dashboard` | Auto-refreshing multi-token dashboard with prices, stats, and liquidity |
 
+### Alpha Streams (WebSocket, signal feeds)
+
+| # | Example | Description |
+|---|---------|-------------|
+| 21 | `stream_alpha_personal` | Personal alpha channel — chat messages from Discord/Telegram/X (60 s) |
+| 22 | `stream_alpha_signal_feed_global` | Global signal feed — token signals from all sources (60 s) |
+| 23 | `stream_alpha_signal_feed_personal` | Personal signal feed with per-signal origin details (60 s) |
+| 24 | `stream_alpha_signal_feed_named` | Named signal feed — requires `<feedId>` arg (60 s) |
+| 25 | `stream_alpha_signal_feed_profile` | Profile signal feed — requires `<profileId>` arg (60 s) |
+
 ## SDK Documentation
 
 See the [SDK README](https://github.com/ShurikenTrade/shuriken-sdk-rs) and the [Shuriken API docs](https://docs.shuriken.trade) for the full API reference.

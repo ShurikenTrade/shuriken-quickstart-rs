@@ -46,7 +46,7 @@ async fn main() {
 
     loop {
         tokio::select! {
-            Some(event) = sub.next() => {
+            Some(Ok(event)) = sub.next() => {
                 let token_id = format!("solana:{}", event.token_address);
 
                 let stats = client.tokens().get_stats(&token_id).await.ok();
